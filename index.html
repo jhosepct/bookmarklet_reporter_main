@@ -144,10 +144,23 @@
       };
 
       const openReceptorWindow = (payload) => {
+        const width = 600;
+        const height = 300;
+
+        // Calcular posición centrada
+        const left = window.screenX + (window.outerWidth - width) / 2;
+        const top = window.screenY + (window.outerHeight - height) / 2;
+
         const receptorUrl = new URL('http://bookmarklet-reporter.vercel.app');
         receptorUrl.searchParams.set('payload', encodeURIComponent(JSON.stringify(payload)));
-        window.open(receptorUrl, '_blank', 'width=600,height=300,scrollbars=yes,resizable=yes');
+
+        window.open(
+          receptorUrl.toString(),
+          '_blank',
+          `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+        );
       };
+
 
       const session = sessionStorage.getItem('userSession');
       if (!session) return alert('⚠️ No se encontró información de sesión');
