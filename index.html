@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bookmarklet - IGH</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f9;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    p {
+      color: #555;
+      margin-bottom: 2rem;
+    }
+
+    .bookmarklet-btn {
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: #007bff;
+      color: #fff !important;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 8px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+      transition: all 0.3s ease;
+      cursor: grab;
+    }
+
+    .bookmarklet-btn:hover {
+      background-color: #0056b3;
+      box-shadow: 0 6px 16px rgba(0, 123, 255, 0.3);
+    }
+
+    .instructions {
+      font-size: 15px;
+      color: #444;
+      margin-top: 1rem;
+    }
+
+    .box {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.05);
+      display: inline-block;
+      max-width: 600px;
+    }
+  </style>
+  <link
+    rel="icon"
+    type="image/png"
+    href="https://cdnimg.bnamericas.com/oFzVVBjZHfNWdBMtKZCNGWYCSbcjsiSUhzyyClOtAqSqoPJVFFtqqdZKiRWKTgNV.png"
+  />
+</head>
+<body>
+  <div class="box">
+    <h1>📌 Agrega el Bookmarklet</h1>
+    <p>Para capturar tareas o feriados automáticamente, arrastra el siguiente botón a tu barra de marcadores:</p>
+
+    <a class="bookmarklet-btn" href="javascript:(() => {
+      const isHoliday = () => !!document.querySelector('.weekend-title');
+      const getCurrentDate = () => {
+        const date = document.querySelector('.current-date')?.textContent.trim();
+        const year = document.querySelector('.vc-title')?.textContent.trim().split(' ')[1];
+        if (!date || !year) return null;
+        if (date.includes(',')) return convertDate(date.split(',')[1].trim(), year);
+        return convertDate(date.trim(), year);
+      };
+
+      const convertDate = (dateString, year) => {
+        const months = {
+          enero:'01', febrero:'02', marzo:'03', abril:'04', mayo:'05', junio:'06',
+          julio:'07', agosto:'08', septiembre:'09', octubre:'10', noviembre:'11', diciembre:'12'
+        };
+        const parts = dateString.split(' ');
+        const day = parts[1].padStart(2,'0');
+        const month = months[parts[parts.length-1].toLowerCase()];
+        return `${year}-${month}-${day}`;
+      };
+
+      const scrapeTask = () => {
+        const tasks = Array.from(document.querySelectorAll('.task-grid__task')).map(task => {
+          return {
+            title: task.querySelector('.task-title')?.textContent.trim(),
+            description: task.querySelector('.task-description')?.textContent.trim(),
+            hours: task.querySelector('.task-dedication')?.textContent.trim()
+          };
+        });
+        return { date: getCurrentDate(), task: tasks };
+      };
+
+      const scrapeHolidays = () => {
+        const sections = document.querySelector('#holidays')?.querySelectorAll('ul') || [];
+        const holidays = [];
+        const today = new Date().toISOString().split('T')[0];
+
+        sections.forEach(section => {
+          const year = section.querySelector('.year')?.textContent.trim();
+          if (Number(year) === new Date().getFullYear()) {
+            const items = section.querySelectorAll('#item-list');
+            items.forEach(item => {
+              const title = item.querySelector('.title')?.textContent.trim();
+              const id = item.querySelector('.item')?.getAttribute('id');
+              if (!title || !id) return;
+              const [start, end] = title.split(' - ').map(t => t.trim());
+              const format = s => {
+                const [d, m, y] = s.split(' ');
+                const months = { ene:'01', feb:'02', mar:'03', abr:'04', may:'05', jun:'06',
+                                 jul:'07', ago:'08', sep:'09', oct:'10', nov:'11', dic:'12' };
+                return `${y}-${months[m.toLowerCase()]}-${d.padStart(2, '0')}`;
+              };
+              holidays.push({ id, start_date: format(start), end_date: format(end) });
+            });
+          }
+        });
+
+        return { date: today, holiday: holidays };
+      };
+
+      const openReceptorWindow = (payload) => {
+        const receptorUrl = new URL('http://bookmarklet-reporter.vercel.app');
+        receptorUrl.searchParams.set('payload', encodeURIComponent(JSON.stringify(payload)));
+        window.open(receptorUrl, '_blank', 'width=600,height=700,scrollbars=yes,resizable=yes');
+      };
+
+      const session = sessionStorage.getItem('userSession');
+      if (!session) return alert('⚠️ No se encontró información de sesión');
+
+      let userCode;
+      try {
+        const parsed = JSON.parse(session);
+        userCode = parsed.employeeId;
+        if (!userCode) throw new Error();
+      } catch {
+        return alert('⚠️ No se pudo obtener el employeeId desde el sessionStorage');
+      }
+
+      const type = isHoliday() ? 'HOLIDAY' : 'TASK';
+      const data = type === 'HOLIDAY' ? scrapeHolidays() : scrapeTask();
+      openReceptorWindow({ userCode, type, ...data });
+    })()">📤 Enviar Evidencia</a>
+
+    <p class="instructions">📍 Si no ves la barra de marcadores, presiona <strong>Ctrl + Shift + B</strong> para mostrarla.</p>
+  </div>
+</body>
+</html>
