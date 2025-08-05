@@ -146,7 +146,7 @@
       const openReceptorWindow = (payload) => {
         const receptorUrl = new URL('http://bookmarklet-reporter.vercel.app');
         receptorUrl.searchParams.set('payload', encodeURIComponent(JSON.stringify(payload)));
-        window.open(receptorUrl, '_blank', 'width=600,height=700,scrollbars=yes,resizable=yes');
+        window.open(receptorUrl, '_blank', 'width=600,height=300,scrollbars=yes,resizable=yes');
       };
 
       const session = sessionStorage.getItem('userSession');
