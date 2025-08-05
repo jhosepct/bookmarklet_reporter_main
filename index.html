@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bookmarklet - IGH</title>
   <style>
     body {
@@ -50,17 +51,33 @@
       background: white;
       padding: 2rem;
       border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.05);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
       display: inline-block;
       max-width: 600px;
     }
   </style>
-  <link
-    rel="icon"
-    type="image/png"
-    href="https://cdnimg.bnamericas.com/oFzVVBjZHfNWdBMtKZCNGWYCSbcjsiSUhzyyClOtAqSqoPJVFFtqqdZKiRWKTgNV.png"
-  />
+  <link rel="icon" type="image/png"
+    href="https://cdnimg.bnamericas.com/oFzVVBjZHfNWdBMtKZCNGWYCSbcjsiSUhzyyClOtAqSqoPJVFFtqqdZKiRWKTgNV.png" />
+
+  <script>
+    (function () {
+      const allowedReferrer = "https://timereport-eng.com";
+      const actualReferrer = document.referrer;
+
+      if (!actualReferrer.startsWith(allowedReferrer)) {
+        document.body.innerHTML = `
+        <div style="font-family: Arial, sans-serif; text-align: center; padding: 2rem;">
+          <h2>⛔ Acceso no autorizado</h2>
+          <p>Esta página solo puede usarse desde <strong>${allowedReferrer}</strong>.</p>
+        </div>
+      `;
+        document.body.style.backgroundColor = "#fff0f0";
+        throw new Error("Bloqueado por referrer");
+      }
+    })();
+  </script>
 </head>
+
 <body>
   <div class="box">
     <h1>📌 Agrega el Bookmarklet</h1>
@@ -148,7 +165,9 @@
       const data = type === 'HOLIDAY' ? scrapeHolidays() : scrapeTask();
       openReceptorWindow({ userCode, type, ...data });
     })()">📤 Enviar Evidencia</a>
-    <p class="instructions">📍 Si no ves la barra de marcadores, presiona <strong>Ctrl + Shift + B</strong> para mostrarla.</p>
+    <p class="instructions">📍 Si no ves la barra de marcadores, presiona <strong>Ctrl + Shift + B</strong> para
+      mostrarla.</p>
   </div>
 </body>
+
 </html>
