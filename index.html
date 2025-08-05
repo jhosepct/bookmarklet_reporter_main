@@ -146,24 +146,20 @@
       const openReceptorWindow = (payload) => {
         const width = 600;
         const height = 300;
-
-        // Calcular posición centrada respecto a la pantalla
         const left = window.screenX + (window.outerWidth - width) / 2;
         const top = window.screenY + (window.outerHeight - height) / 2;
-
         const receptorUrl = new URL('http://bookmarklet-reporter.vercel.app');
         receptorUrl.searchParams.set('payload', encodeURIComponent(JSON.stringify(payload)));
-
         const win = window.open(
           receptorUrl.toString(),
           '_blank',
           `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
         );
-
         if (!win) {
           console.error('❌ La ventana emergente fue bloqueada.');
         }
       };
+
 
       const session = sessionStorage.getItem('userSession');
       if (!session) return alert('⚠️ No se encontró información de sesión');
