@@ -84,7 +84,7 @@
     <p>Para capturar tareas o feriados automáticamente, arrastra el siguiente botón a tu barra de marcadores:</p>
 
     <a class="bookmarklet-btn" href="javascript:(() => {
-      const isHoliday = () => !!document.querySelector('.weekend-title');
+      const isHoliday = () => !!document.querySelector('#holidays');
       const getCurrentDate = () => {
         const date = document.querySelector('.current-date')?.textContent.trim();
         const year = document.querySelector('.vc-title')?.textContent.trim().split(' ')[1];
@@ -164,6 +164,10 @@
       const session = sessionStorage.getItem('userSession');
       if (!session) return alert('⚠️ No se encontró información de sesión');
 
+      const wekeend = () => !!document.querySelector('.weekend-title');
+      console.log(wekeend());
+      if(wekeend()) return alert('⚠️ Dia festivo o fin de semana');
+
       let userCode;
       try {
         const parsed = JSON.parse(session);
@@ -174,7 +178,7 @@
       }
 
       const type = isHoliday() ? 'HOLIDAY' : 'TASK';
-      const data = type === 'HOLIDAY' ? scrapeHolidays() : scrapeTask();
+      const data = type === 'TASK' ? scrapeTask() : scrapeHolidays();
       openReceptorWindow({ userCode, type, ...data });
     })()">📤 Enviar Evidencia</a>
     <p class="instructions">📍 Si no ves la barra de marcadores, presiona <strong>Ctrl + Shift + B</strong> para
